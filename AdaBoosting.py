@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  untitled.py
+#  AdaBoosting.py
 #  
-#  Copyright 2013 phib <phib@phib-OptiPlex-9010>
+#  Copyright 2013 Phiradet Bangcharoensap <phiradet@gmail.com>
 #  
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -84,9 +84,9 @@ class AdaBoost:
 				sumDistribution+=self.distribution[i]
 			self.distribution=self.distribution/sumDistribution
 
-		print self.alpha;
+		#print self.alpha;
 
-	def predict(sample):
+	def predict(self, sample):
 		predictSum = 0
 		for i in range(len(self.hypothesis)):
 			predictSum += self.alpha[i]*self.hypothesis[i](sample)
@@ -105,12 +105,41 @@ def readInput(filename="mushroomB5000.txt"):
 		labels.append(-1 if tokens[0]=='0' else 1)	
 		samples.append(map(lambda x:-1 if x=='0' else 1, tokens[1:]))
 	return samples, labels
+
+def evaluation(obj, filename="mushroomB3000.txt"):
+	samples, labels = readInput(filename=filename)
+	TP = 0.0
+	FP = 0.0
+	TN = 0.0
+	FN = 0.0
+	for i in range(len(samples)):
+		currSample = samples[i]
+		currLabel = labels[i]
+		predictResult = obj.predict(currSample)
+		if predictResult == 1:
+			if predictResult==currLabel:
+				TP+=1.0
+			else:
+				FP+=1.0
+		else:
+			if predictResult==currLabel:
+				TN+=1.0
+			else:
+				FN+=1.0
+	print "--- Confusion Matrix ---"
+	print TP, FP
+	print FN, TN 
+	print "------------------------"
+	print "accuracy: %.2f %%"%((TP+TN)/(TP+TN+FP+FN)*100)
+	print "sensitivity: %.2f %%"%((TP)/(TP+FN)*100)
+	print "specificity: %.2f %%"%((TN)/(FP+TN)*100)
 			
 def main():
 	samples, labels = readInput()
 	print len(samples[0])
 	ada = AdaBoost()
 	ada.train(samples, labels, 119, 0.01)
+	evaluation(ada)
 	return 0
 
 if __name__ == '__main__':
